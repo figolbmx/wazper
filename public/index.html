@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wazper - WhatsApp Blaster Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .bg-success-subtle {
+            background-color: #d1e7dd !important;
+        }
+        .bg-danger-subtle {
+            background-color: #f8d7da !important;
+        }
+        .font-monospace {
+            font-family: 'Courier New', monospace;
+        }
+        #sendResults {
+            font-size: 0.875rem;
+        }
+        #sendResults .py-1 {
+            border-left: 3px solid transparent;
+        }
+        #sendResults .bg-success-subtle {
+            border-left-color: #198754;
+        }
+        #sendResults .bg-danger-subtle {
+            border-left-color: #dc3545;
+        }
+    </style>
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
+        <div class="bg-dark border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading bg-primary text-white p-3">
+                <i class="fas fa-paper-plane me-2"></i>Wazper
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#dashboard" class="list-group-item list-group-item-action bg-dark text-white active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a href="#accounts" class="list-group-item list-group-item-action bg-dark text-white" data-section="accounts">
+                    <i class="fas fa-users me-2"></i>Akun WhatsApp
+                </a>
+                <a href="#messages" class="list-group-item list-group-item-action bg-dark text-white" data-section="messages">
+                    <i class="fas fa-paper-plane me-2"></i>Kirim Pesan
+                </a>
+                <a href="#contacts" class="list-group-item list-group-item-action bg-dark text-white" data-section="contacts">
+                    <i class="fas fa-address-book me-2"></i>Kontak
+                </a>
+                <a href="#templates" class="list-group-item list-group-item-action bg-dark text-white" data-section="templates">
+                    <i class="fas fa-file-alt me-2"></i>Template Pesan
+                </a>
+                <a href="#campaigns" class="list-group-item list-group-item-action bg-dark text-white" data-section="campaigns">
+                    <i class="fas fa-broadcast-tower me-2"></i>Kampanye
+                </a>
+                <a href="#media" class="list-group-item list-group-item-action bg-dark text-white" data-section="media">
+                    <i class="fas fa-images me-2"></i>Media
+                </a>
+                <a href="#logs" class="list-group-item list-group-item-action bg-dark text-white" data-section="logs">
+                    <i class="fas fa-history me-2"></i>Log Aktivitas
+                </a>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="navbar-nav ms-auto">
+                        <div class="nav-item">
+                            <span class="navbar-text" id="status-indicator">
+                                <i class="fas fa-circle text-success me-1"></i>Online
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="content-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+                        <button class="btn btn-primary" onclick="refreshStats()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Akun
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-accounts">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Akun Terhubung
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="connected-accounts">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Kampanye Aktif
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="active-campaigns">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-broadcast-tower fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Total Kontak
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-contacts">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-address-book fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Kampanye Terbaru</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="recent-campaigns-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama Kampanye</th>
+                                                    <th>Status</th>
+                                                    <th>Progress</th>
+                                                    <th>Tanggal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Status Akun</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="account-status-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accounts Section -->
+                <div id="accounts-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-users me-2"></i>Akun WhatsApp</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-info" onclick="checkAllAccountsStatus()" title="Cek status semua akun">
+                                <i class="fas fa-sync-alt"></i> Cek Semua Status
+                            </button>
+                            <button class="btn btn-primary" onclick="createNewAccount()">
+                                <i class="fas fa-plus"></i> Tambah Akun
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="accounts-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nama</th>
+                                            <th>Nomor</th>
+                                            <th>Status</th>
+                                            <th>Terakhir Terhubung</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Section -->
+                <div id="messages-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-paper-plane me-2"></i>Kirim Pesan WhatsApp</h2>
+                    </div>
+
+                    <div class="row">
+                        <!-- Form Kirim Pesan -->
+                        <div class="col-lg-8">
+                            <div class="card shadow">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-envelope me-2"></i>Compose Message</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="sendMessageForm">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="fromAccount" class="form-label">Dari Akun</label>
+                                                <select class="form-select" id="fromAccount" required>
+                                                    <option value="">Pilih akun WhatsApp...</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="recipients" class="form-label">Penerima</label>
+                                                <textarea class="form-control" id="recipients" rows="5" required
+                                                          placeholder="628123456789&#10;628234567890,John Doe&#10;628345678901,Jane Smith,Manager,IT,Jakarta&#10;&#10;Format: satu nomor per baris&#10;Untuk mail merge: 628123456,data1,data2,data3,dst (max 10 data)"></textarea>
+                                                <div class="form-text">
+                                                    Satu nomor per baris. Untuk mail merge: 628123456,data1,data2,data3 (maksimal 10 data per nomor)
+                                                    <br><span id="recipientCount" class="text-primary">0 penerima terdeteksi</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="messageText" class="form-label">Pesan Template</label>
+                                            <textarea class="form-control" id="messageText" rows="6" 
+                                                      placeholder="Halo, selamat pagi bapak/ibu {text1}&#10;Posisi: {text2}, Department: {text3}&#10;&#10;Gunakan {text1} s/d {text10} untuk mail merge"></textarea>
+                                            <div class="form-text">
+                                                <span id="charCount">0</span> karakter | Gunakan {text1} sampai {text10} untuk mail merge
+                                            </div>
+                                        </div>
+
+                                        <!-- Media Upload Section -->
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="fas fa-paperclip me-2"></i>Lampiran Media (Opsional)
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="file" class="form-control" id="mediaFile" 
+                                                       accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt">
+                                                <button type="button" class="btn btn-outline-secondary" id="clearMedia">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">
+                                                Supported: Gambar (JPG, PNG, GIF), Video (MP4), Audio (MP3, OGG), Dokumen (PDF, DOC, TXT)
+                                            </div>
+                                            
+                                            <!-- Media Preview -->
+                                            <div id="mediaPreview" style="display: none;" class="mt-2 p-2 border rounded">
+                                                <div class="d-flex align-items-center">
+                                                    <div id="mediaIcon" class="me-2"></div>
+                                                    <div>
+                                                        <div id="mediaName" class="fw-bold"></div>
+                                                        <div id="mediaSize" class="text-muted small"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delay Configuration -->
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="fas fa-clock me-2"></i>Delay Antar Pesan (detik)
+                                            </label>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="delayMin" class="form-label text-muted small">Minimum</label>
+                                                    <input type="number" class="form-control" id="delayMin" 
+                                                           min="1" max="300" value="10" placeholder="10">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="delayMax" class="form-label text-muted small">Maksimum</label>
+                                                    <input type="number" class="form-control" id="delayMax" 
+                                                           min="1" max="300" value="30" placeholder="30">
+                                                </div>
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Delay random antara <span id="delayDisplay">10-30</span> detik antar pengiriman untuk menghindari spam detection
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="scheduleMessage">
+                                                <label class="form-check-label" for="scheduleMessage">
+                                                    Jadwalkan Pesan
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3" id="scheduleOptions" style="display: none;">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="scheduleDate" class="form-label">Tanggal</label>
+                                                    <input type="date" class="form-control" id="scheduleDate">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="scheduleTime" class="form-label">Waktu</label>
+                                                    <input type="time" class="form-control" id="scheduleTime">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary btn-lg w-100" id="sendButton">
+                                                    <i class="fas fa-paper-plane me-2"></i>Kirim Pesan
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Control Buttons (hidden by default) -->
+                                        <div class="row mt-2" id="controlButtons" style="display: none;">
+                                            <div class="col-6">
+                                                <button type="button" class="btn btn-warning btn-lg w-100" id="pauseButton">
+                                                    <i class="fas fa-pause me-2"></i>Pause
+                                                </button>
+                                            </div>
+                                            <div class="col-6">
+                                                <button type="button" class="btn btn-danger btn-lg w-100" id="stopButton">
+                                                    <i class="fas fa-stop me-2"></i>Stop
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview & Quick Actions -->
+                        <div class="col-lg-4">
+                            <div class="card shadow mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Preview Pesan</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="bg-light p-3 rounded" style="min-height: 150px;">
+                                        <div id="messagePreview" class="text-muted">
+                                            Preview pesan akan muncul di sini...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card shadow mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-lightning-bolt me-2"></i>Quick Templates</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="insertTemplate('greeting')">
+                                            👋 Salam Pembuka
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="insertTemplate('promo')">
+                                            🎉 Pesan Promo
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="insertTemplate('reminder')">
+                                            ⏰ Pengingat
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="insertTemplate('thanks')">
+                                            🙏 Terima Kasih
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Send Results -->
+                            <div class="card shadow" id="sendResultsCard" style="display: none;">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Hasil Pengiriman</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Summary:</small>
+                                        <div id="sendSummary" class="fw-bold text-primary">
+                                            <!-- Summary will be inserted here -->
+                                        </div>
+                                    </div>
+                                    <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
+                                        <div id="sendResults">
+                                            <!-- Results will be inserted here -->
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="clearSendResults()">
+                                            <i class="fas fa-times me-1"></i>Clear Results
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections will be loaded dynamically -->
+                <div id="contacts-section" class="content-section" style="display: none;"></div>
+                <div id="templates-section" class="content-section" style="display: none;"></div>
+                <div id="campaigns-section" class="content-section" style="display: none;"></div>
+                <div id="media-section" class="content-section" style="display: none;"></div>
+                <div id="logs-section" class="content-section" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Account Modal -->
+    <div class="modal fade" id="addAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Akun WhatsApp</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAccountForm">
+                        <div class="mb-3">
+                            <label for="accountName" class="form-label">Nama Akun</label>
+                            <input type="text" class="form-control" id="accountName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountPhone" class="form-label">Nomor Telepon</label>
+                            <input type="text" class="form-control" id="accountPhone" placeholder="628123456789" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="addAccount()">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-qrcode me-2"></i>Scan QR Code WhatsApp
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Langkah-langkah:</strong>
+                        <ol class="text-start mt-2 mb-0">
+                            <li>Buka WhatsApp di ponsel Anda</li>
+                            <li>Tap Menu (⋮) > WhatsApp Web</li>
+                            <li>Tap "Scan QR Code"</li>
+                            <li>Arahkan kamera ke QR Code di bawah</li>
+                        </ol>
+                    </div>
+                    
+                    <div id="qr-container" class="my-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>QR Code harus di-refresh manual. Klik "Cek Status" untuk memeriksa koneksi.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary me-2" id="refresh-qr-btn">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh QR
+                    </button>
+                    <button type="button" class="btn btn-info me-2" id="check-status-btn">
+                        <i class="fas fa-plug me-2"></i>Cek Status
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
